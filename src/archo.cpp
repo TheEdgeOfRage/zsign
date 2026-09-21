@@ -54,11 +54,13 @@ bool ZArchO::Init(uint8_t* pBase, uint32_t uLength)
 				s_uExecSegLimit = seglc->vmsize;
 				for (uint32_t j = 0; j < BO(seglc->nsects); j++) {
 					section* sect = (section*)((pLoadCommand + sizeof(segment_command)) + sizeof(section) * j);
-					if (0 == strcmp("__text", sect->sectname)) {
-						if (BO(sect->offset) > (BO(m_pHeader->sizeofcmds) + m_uHeaderSize)) {
-							m_uLoadCommandsFreeSpace = BO(sect->offset) - BO(m_pHeader->sizeofcmds) - m_uHeaderSize;
+					if (BO(sect->offset) > (BO(m_pHeader->sizeofcmds) + m_uHeaderSize)) {
+						const uint32_t freeSpace = BO(sect->offset) - BO(m_pHeader->sizeofcmds) - m_uHeaderSize;
+						if (m_uLoadCommandsFreeSpace == 0 || freeSpace < m_uLoadCommandsFreeSpace) {
+							m_uLoadCommandsFreeSpace = freeSpace;
 						}
-					} else if (0 == strcmp("__info_plist", sect->sectname)) {
+					}
+					if (0 == strcmp("__info_plist", sect->sectname)) {
 						m_strInfoPlist.append((const char*)m_pBase + BO(sect->offset), BO(sect->size));
 					}
 				}
@@ -74,11 +76,13 @@ bool ZArchO::Init(uint8_t* pBase, uint32_t uLength)
 				s_uExecSegLimit = seglc->vmsize;
 				for (uint32_t j = 0; j < BO(seglc->nsects); j++) {
 					section_64* sect = (section_64*)((pLoadCommand + sizeof(segment_command_64)) + sizeof(section_64) * j);
-					if (0 == strcmp("__text", sect->sectname)) {
-						if (BO(sect->offset) > (BO(m_pHeader->sizeofcmds) + m_uHeaderSize)) {
-							m_uLoadCommandsFreeSpace = BO(sect->offset) - BO(m_pHeader->sizeofcmds) - m_uHeaderSize;
+					if (BO(sect->offset) > (BO(m_pHeader->sizeofcmds) + m_uHeaderSize)) {
+						const uint32_t freeSpace = BO(sect->offset) - BO(m_pHeader->sizeofcmds) - m_uHeaderSize;
+						if (m_uLoadCommandsFreeSpace == 0 || freeSpace < m_uLoadCommandsFreeSpace) {
+							m_uLoadCommandsFreeSpace = freeSpace;
 						}
-					} else if (0 == strcmp("__info_plist", sect->sectname)) {
+					}
+					if (0 == strcmp("__info_plist", sect->sectname)) {
 						m_strInfoPlist.append((const char*)m_pBase + BO(sect->offset), BO((uint32_t)sect->size));
 					}
 				}
